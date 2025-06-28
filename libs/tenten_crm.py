@@ -1,4 +1,4 @@
-from .crm_customer import CRMCustomer
+from .models import CRMCustomer
 from .status import Status
 
 class TentenCRM:
