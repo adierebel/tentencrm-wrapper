@@ -1,10 +1,16 @@
 from setuptools import setup, find_packages
-from .libs import __VERSION
+from tentencrm import __VERSION__
 
 setup(
     name="tentencrm",
-    version=__VERSION,
-    packages=find_packages(),
+    version=__VERSION__,
+    description='Python API Wrapper for TentenCRM',
+    author='adierebel',
+    url='https://github.com/adierebel/tentencrm-wrapper',
+    python_requires=">=3.10",
+    packages=['tentencrm'],
+    py_modules=['tentencrm'],
     include_package_data=True,
-    install_requires=["flask"],
+    license='MIT',
+    install_requires=["flask==3.1.1", "requests==2.32.4"],
 )

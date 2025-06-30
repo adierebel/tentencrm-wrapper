@@ -9,13 +9,13 @@ from os import path
 import platform
 import sys
 
-__VERSION = "1.0"
+__VERSION__ = "1.0"
 
 class TentenCRM:
-    def __init__(self, api_base_url=None, api_key=None):
-        self.api_base_url = api_base_url
-        self.api_key = api_key
-        self.http_timeout = 10
+    def __init__(self, **kwargs):
+        self.base_url = kwargs.get("base_url")
+        self.api_key = kwargs.get("api_key")
+        self.timeout = kwargs.get("timeout") or 10
         self.status = Status()
 
     #
@@ -45,12 +45,12 @@ class TentenCRM:
             files = {"file": (path.basename(filepath), open(filepath, "rb"))}
 
             # POST
-            url = f"{self.api_base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+            url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
             req = http_post(
                 url,
                 files=files,
                 headers=self.http_headers(),
-                timeout=self.http_timeout
+                timeout=self.timeout
             )
             return req.json()
 
@@ -60,12 +60,12 @@ class TentenCRM:
     def http_post(self, endpoint, payload):
         try:
             # POST
-            url = f"{self.api_base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+            url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
             req = http_post(
                 url,
                 json=payload,
                 headers=self.http_headers(),
-                timeout=self.http_timeout
+                timeout=self.timeout
             )
             return req.json()
 
@@ -75,12 +75,12 @@ class TentenCRM:
     def http_get(self, endpoint, params):
         try:
             # GET
-            url = f"{self.api_base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+            url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
             url = url + "?" + urlencode(params)
             req = http_get(
                 url,
                 headers=self.http_headers(),
-                timeout=self.http_timeout
+                timeout=self.timeout
             )
             return req.json()
 
@@ -197,13 +197,18 @@ class FlaskTentenCRM(TentenCRM):
 
     def init_app(self, app):
         # Get config
-        self.api_base_url = app.config.get("TENTEN_CRM_BASE_URL")
+        self.base_url = app.config.get("TENTEN_CRM_BASE_URL")
         self.api_key = app.config.get("TENTEN_CRM_API_KEY")
-        if not self.api_base_url or not self.api_key:
+        self.timeout = app.config.get("TENTEN_CRM_TIMEOUT") or 10
+        if not self.base_url or not self.api_key:
             raise RuntimeError("Missing TENTEN_CRM_BASE_URL or TENTEN_CRM_API_KEY in app config.")
 
         # Init
-        super().__init__(self.api_base_url, self.api_key)
+        super().__init__(
+            base_url = self.base_url,
+            api_key = self.api_key,
+            timeout = self.timeout
+        )
 
         # Ext access
         app.extensions = getattr(app, "extensions", {})
