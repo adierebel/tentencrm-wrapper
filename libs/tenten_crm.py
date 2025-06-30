@@ -1,10 +1,21 @@
 from .models import CRMCustomer
 from .status import Status
+from time import time
+from random import randrange
+from hashlib import sha512
+from urllib.parse import urlencode
+from requests import get as http_get, post as http_post
+from os import path
+import platform
+import sys
+
+__VERSION = "1.0"
 
 class TentenCRM:
-    def __init__(self, api_endpoint=None, api_key=None):
-        self.api_endpoint = api_endpoint
+    def __init__(self, api_base_url=None, api_key=None):
+        self.api_base_url = api_base_url
         self.api_key = api_key
+        self.http_timeout = 10
         self.status = Status()
 
     #
@@ -12,16 +23,69 @@ class TentenCRM:
     #
 
     def http_req_signature(self):
-        pass
+        tsnow = int(time())
+        multiplier = randrange(1, 9)
+        hash_target = f"{self.api_key*multiplier}.{tsnow}"
+        hash_result = sha512(hash_target.encode('utf-8')).hexdigest()
+        return f"{hash_result}.{multiplier}.{tsnow}"
 
-    def http_req(self, method, endpoint, payload=None):
-        pass
+    def http_headers(self):
+        return {
+            'Authorization': f"Basic {self.http_req_signature()}",
+            'User-Agent': f"TentenCRM/{__VERSION} ({platform.system()}; U; {platform.machine()}) Python/{sys.version_info.major}.{sys.version_info.minor}"
+        }
+
+    def http_upload(self, endpoint, filepath):
+        try:
+            # Check file exist
+            if not path.isfile(filepath):
+                raise Exception("File not exist")
+
+            # File
+            files = {"file": (path.basename(filepath), open(filepath, "rb"))}
+
+            # POST
+            url = f"{self.api_base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+            req = http_post(
+                url,
+                files=files,
+                headers=self.http_headers(),
+                timeout=self.http_timeout
+            )
+            return req.json()
+
+        except Exception as e:
+            raise e
 
     def http_post(self, endpoint, payload):
-        pass
+        try:
+            # POST
+            url = f"{self.api_base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+            req = http_post(
+                url,
+                json=payload,
+                headers=self.http_headers(),
+                timeout=self.http_timeout
+            )
+            return req.json()
+
+        except Exception as e:
+            raise e
 
     def http_get(self, endpoint, params):
-        pass
+        try:
+            # GET
+            url = f"{self.api_base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+            url = url + "?" + urlencode(params)
+            req = http_get(
+                url,
+                headers=self.http_headers(),
+                timeout=self.http_timeout
+            )
+            return req.json()
+
+        except Exception as e:
+            raise e
 
     #
     # API: Customer
@@ -133,13 +197,13 @@ class FlaskTentenCRM(TentenCRM):
 
     def init_app(self, app):
         # Get config
-        self.api_endpoint = app.config.get("TENTEN_CRM_ENDPOINT")
-        self.api_key = app.config.get("TENTEN_CRM_KEY")
-        if not self.api_endpoint or not self.api_key:
-            raise RuntimeError("Missing TENTEN_CRM_ENDPOINT or TENTEN_CRM_KEY in app config.")
+        self.api_base_url = app.config.get("TENTEN_CRM_BASE_URL")
+        self.api_key = app.config.get("TENTEN_CRM_API_KEY")
+        if not self.api_base_url or not self.api_key:
+            raise RuntimeError("Missing TENTEN_CRM_BASE_URL or TENTEN_CRM_API_KEY in app config.")
 
         # Init
-        super().__init__(self.api_endpoint, self.api_key)
+        super().__init__(self.api_base_url, self.api_key)
 
         # Ext access
         app.extensions = getattr(app, "extensions", {})
