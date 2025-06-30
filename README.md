@@ -47,7 +47,7 @@ from tentencrm import FlaskTentenCRM
 # Init app and update config
 app = Flask(__name__)
 app.config.update(
-    TENTEN_CRM_BASE_URL = "http://localhost:8081/",
+    TENTEN_CRM_BASE_URL = "http://localhost:8081/api/v1/",
     TENTEN_CRM_API_KEY = "your-api-key",
     TENTEN_CRM_TIMEOUT = 10,
 )
@@ -61,7 +61,7 @@ Use directly:
 ```python
 from tentencrm import TentenCRM
 tenten_crm = TentenCRM(
-    base_url = "http://localhost:8081/",
+    base_url = "http://localhost:8081/api/v1/",
     api_key = "your-api-key",
     timeout = 10
 )

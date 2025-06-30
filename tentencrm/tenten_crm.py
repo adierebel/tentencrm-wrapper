@@ -32,7 +32,7 @@ class TentenCRM:
     def http_headers(self):
         return {
             'Authorization': f"Basic {self.http_req_signature()}",
-            'User-Agent': f"TentenCRM/{__VERSION} ({platform.system()}; U; {platform.machine()}) Python/{sys.version_info.major}.{sys.version_info.minor}"
+            'User-Agent': f"TentenCRM/{__VERSION__} ({platform.system()}; U; {platform.machine()}) Python/{sys.version_info.major}.{sys.version_info.minor}"
         }
 
     def http_upload(self, endpoint, filepath):
@@ -91,8 +91,11 @@ class TentenCRM:
     # API: Customer
     #
 
+    def customer_update(self, customer: CRMCustomer):
+        return self.http_post("/customer/update/", customer.__dict__)
+
     def customer_register(self, customer: CRMCustomer):
-        pass
+        return self.http_post("/customer/register/", customer.__dict__)
 
     def customer_register_step(self, company_id=None, user_id=None, step=None):
         # Check
@@ -100,23 +103,16 @@ class TentenCRM:
             raise ValueError("company_id or user_id cannot be empty.")
 
         # Update
-        pass
-
-    def customer_update(self, company_id=None, user_id=None, customer: CRMCustomer=None):
-        # Check
-        if not company_id and not user_id:
-            raise ValueError("company_id or user_id cannot be empty.")
-
-        # Update
-        pass
+        return self.http_get("/customer/register-step/", {
+            "company_id": company_id,
+            "user_id": user_id,
+            "step": step,
+        })
 
     def customer_pipeline(self, company_id=None, user_id=None, pipeline=None, update_milestone=True):
         # Check
         if not company_id and not user_id:
             raise ValueError("company_id or user_id cannot be empty.")
-
-        # Update
-        pass
 
         # Also update milestone
         if update_milestone and pipeline in [
@@ -128,13 +124,25 @@ class TentenCRM:
             ]:
             self.customer_milestone(company_id, user_id, pipeline)
 
-    def customer_acquisition(self, company_id=None, user_id=None, acquisition=None):
+        # Update
+        return self.http_get("/customer/pipeline/", {
+            "company_id": company_id,
+            "user_id": user_id,
+            "pipeline": pipeline,
+        })
+
+    def customer_acquisition(self, company_id=None, user_id=None, acquisition=None, extra=None):
         # Check
         if not company_id and not user_id:
             raise ValueError("company_id or user_id cannot be empty.")
 
         # Update
-        pass
+        return self.http_get("/customer/acquisition/", {
+            "company_id": company_id,
+            "user_id": user_id,
+            "acquisition": acquisition,
+            "extra": extra
+        })
 
     def customer_behavior(self, company_id=None, user_id=None, behavior=None):
         # Check
@@ -142,7 +150,11 @@ class TentenCRM:
             raise ValueError("company_id or user_id cannot be empty.")
 
         # Update
-        pass
+        return self.http_get("/customer/behavior/", {
+            "company_id": company_id,
+            "user_id": user_id,
+            "behavior": behavior,
+        })
 
     def customer_activity(self, company_id=None, user_id=None, activity=None):
         # Check
@@ -150,7 +162,11 @@ class TentenCRM:
             raise ValueError("company_id or user_id cannot be empty.")
 
         # Update
-        pass
+        return self.http_get("/customer/activity/", {
+            "company_id": company_id,
+            "user_id": user_id,
+            "activity": activity,
+        })
 
     def customer_milestone(self, company_id=None, user_id=None, milestone=None):
         # Check
@@ -162,7 +178,11 @@ class TentenCRM:
             milestone = self.status.MILESTONE_REGISTERED
 
         # Update
-        pass
+        return self.http_get("/customer/milestone/", {
+            "company_id": company_id,
+            "user_id": user_id,
+            "milestone": milestone,
+        })
 
     #
     # API: Support Ticket
