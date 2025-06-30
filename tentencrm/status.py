@@ -47,5 +47,13 @@ class Status:
     REGISTER_STEP_LOGIN = "login"
     REGISTER_STEP_ACTIVE = "active"
 
+    # Support Ticket
+    TICKET_STATUS_OPEN = "open"
+    TICKET_STATUS_ON_PROGRESS = "on_progress"
+    TICKET_STATUS_CLOSED = "closed"
+    TICKET_PRIORITY_LOW = "low"
+    TICKET_PRIORITY_MEDIUM = "medium"
+    TICKET_PRIORITY_HIGH = "high"
+
     def __setattr__(self, name, value):
         raise TypeError("Constants can't be modified")

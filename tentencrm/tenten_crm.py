@@ -1,7 +1,6 @@
-from .models import CRMCustomer
+from .models import CRMCustomer, CRMTicket
 from .status import Status
 from time import time
-from random import randrange
 from hashlib import sha512
 from urllib.parse import urlencode
 from requests import get as http_get, post as http_post
@@ -15,8 +14,15 @@ class TentenCRM:
     def __init__(self, **kwargs):
         self.base_url = kwargs.get("base_url")
         self.api_key = kwargs.get("api_key")
+        self.api_secret = kwargs.get("api_secret")
         self.timeout = kwargs.get("timeout") or 10
         self.status = Status()
+
+    def remove_none_kv(self, kv):
+        output = {}
+        for k, v in kv.items():
+            output[k] = v or ''
+        return output
 
     #
     # HTTP Request
@@ -24,10 +30,9 @@ class TentenCRM:
 
     def http_req_signature(self):
         tsnow = int(time())
-        multiplier = randrange(1, 9)
-        hash_target = f"{self.api_key*multiplier}.{tsnow}"
+        hash_target = f"{self.api_key}.{self.api_secret}.{tsnow}"
         hash_result = sha512(hash_target.encode('utf-8')).hexdigest()
-        return f"{hash_result}.{multiplier}.{tsnow}"
+        return f"{hash_result}.{self.api_key}.{tsnow}"
 
     def http_headers(self):
         return {
@@ -35,57 +40,48 @@ class TentenCRM:
             'User-Agent': f"TentenCRM/{__VERSION__} ({platform.system()}; U; {platform.machine()}) Python/{sys.version_info.major}.{sys.version_info.minor}"
         }
 
-    def http_upload(self, endpoint, filepath):
-        try:
-            # Check file exist
-            if not path.isfile(filepath):
-                raise Exception("File not exist")
+    def http_upload(self, endpoint, filepath, field_name="file"):
+        # Check file exist
+        if not path.isfile(filepath):
+            raise Exception("File not exist")
 
-            # File
-            files = {"file": (path.basename(filepath), open(filepath, "rb"))}
+        # File
+        files = {field_name: (path.basename(filepath), open(filepath, "rb"))}
 
-            # POST
-            url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
-            req = http_post(
-                url,
-                files=files,
-                headers=self.http_headers(),
-                timeout=self.timeout
-            )
-            return req.json()
-
-        except Exception as e:
-            raise e
+        # POST
+        url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+        req = http_post(
+            url,
+            files=files,
+            headers=self.http_headers(),
+            timeout=self.timeout
+        )
+        req.raise_for_status()
+        return req.json()
 
     def http_post(self, endpoint, payload):
-        try:
-            # POST
-            url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
-            req = http_post(
-                url,
-                json=payload,
-                headers=self.http_headers(),
-                timeout=self.timeout
-            )
-            return req.json()
-
-        except Exception as e:
-            raise e
+        # POST
+        url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+        req = http_post(
+            url,
+            json=payload,
+            headers=self.http_headers(),
+            timeout=self.timeout
+        )
+        req.raise_for_status()
+        return req.json()
 
     def http_get(self, endpoint, params):
-        try:
-            # GET
-            url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
-            url = url + "?" + urlencode(params)
-            req = http_get(
-                url,
-                headers=self.http_headers(),
-                timeout=self.timeout
-            )
-            return req.json()
-
-        except Exception as e:
-            raise e
+        # GET
+        url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+        url = url + "?" + urlencode(self.remove_none_kv(params))
+        req = http_get(
+            url,
+            headers=self.http_headers(),
+            timeout=self.timeout
+        )
+        req.raise_for_status()
+        return req.json()
 
     #
     # API: Customer
@@ -188,26 +184,88 @@ class TentenCRM:
     # API: Support Ticket
     #
 
-    def support_ticket_get_by_id(self):
-        pass
+    def support_ticket_new(self, ticket_data: CRMTicket):
+        return self.http_post("/support/new/", ticket_data.__dict__)
 
-    def support_ticket_get_paginated(self):
-        pass
+    def support_ticket_update(self, ticket_id, ticket_data: CRMTicket):
+        return self.http_post(f"/support/update/?id={ticket_id}", ticket_data.__dict__)
 
-    def support_ticket_get_detail(self):
-        pass
+    def support_ticket_get_paginated(
+        self,
+        search="",
+        status="all", # open, on_progress, closed
+        priority="all", # low, medium, high
+        category="all",
+        sort="newest",
+        page=1,
+        per_page=48,
+    ):
+        # Update
+        return self.http_get("/support/get-paginated/", {
+            "q": search,
+            "status": status,
+            "priority": priority,
+            "category": category,
+            "sort": sort,
+            "page": page,
+            "per_page": per_page,
+        })
 
-    def support_ticket_new(self):
-        pass
+    def support_ticket_get_by_id(self, ticket_id):
+        # Check
+        if not ticket_id:
+            raise ValueError("ticket_id cannot be empty.")
 
-    def support_ticket_update(self):
-        pass
+        # End
+        return self.http_get("/support/get-by-id/", {"id": ticket_id})
 
-    def support_ticket_delete(self):
-        pass
+    def support_ticket_get_detail(self, ticket_id):
+        # Check
+        if not ticket_id:
+            raise ValueError("ticket_id cannot be empty.")
 
-    def support_ticket_status(self):
-        pass
+        # End
+        return self.http_get("/support/get-detail/", {"id": ticket_id})
+
+    def support_ticket_delete(self, ticket_id):
+        # Check
+        if not ticket_id:
+            raise ValueError("ticket_id cannot be empty.")
+
+        # End
+        return self.http_get("/support/delete/", {"id": ticket_id})
+
+    def support_ticket_status(self, ticket_id, status):
+        # Check
+        if not ticket_id and not status:
+            raise ValueError("ticket_id and status cannot be empty.")
+
+        # End
+        return self.http_get("/support/status/", {"id": ticket_id, "status": status})
+
+    def support_ticket_priority(self, ticket_id, priority):
+        # Check
+        if not ticket_id and not priority:
+            raise ValueError("ticket_id and priority cannot be empty.")
+
+        # End
+        return self.http_get("/support/priority/", {"id": ticket_id, "priority": priority})
+
+    def support_ticket_attachment_upload(self, ticket_id, filepath):
+        # Check
+        if not ticket_id:
+            raise ValueError("ticket_id cannot be empty.")
+
+        # End
+        return self.http_upload(f"/support/upload-attachment/?id={ticket_id}", filepath=filepath)
+
+    def support_ticket_attachment_delete(self, attachment_id):
+        # Check
+        if not attachment_id:
+            raise ValueError("attachment_id cannot be empty.")
+
+        # End
+        return self.http_get("/support/delete-attachment/", {"id": attachment_id})
 
 
 class FlaskTentenCRM(TentenCRM):
@@ -219,14 +277,16 @@ class FlaskTentenCRM(TentenCRM):
         # Get config
         self.base_url = app.config.get("TENTEN_CRM_BASE_URL")
         self.api_key = app.config.get("TENTEN_CRM_API_KEY")
+        self.api_secret = app.config.get("TENTEN_CRM_API_SECRET")
         self.timeout = app.config.get("TENTEN_CRM_TIMEOUT") or 10
         if not self.base_url or not self.api_key:
-            raise RuntimeError("Missing TENTEN_CRM_BASE_URL or TENTEN_CRM_API_KEY in app config.")
+            raise RuntimeError("Missing TENTEN_CRM_BASE_URL or TENTEN_CRM_API_KEY or TENTEN_CRM_API_SECRET in app config.")
 
         # Init
         super().__init__(
             base_url = self.base_url,
             api_key = self.api_key,
+            api_secret = self.api_secret,
             timeout = self.timeout
         )
 

@@ -12,13 +12,12 @@ class CRMCustomer:
     join_date: str
 
 @dataclass
-class Ticket:
-    pass
-
-@dataclass
-class TicketAttachment:
-    pass
-
-@dataclass
-class TicketHistory:
-    pass
+class CRMTicket:
+    code: str
+    status: str
+    priority: str
+    category: str
+    subject: str
+    description: str
+    company_name: str
+    agent_name: str
