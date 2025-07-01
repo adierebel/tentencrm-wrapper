@@ -71,26 +71,74 @@ tenten_crm = TentenCRM(
 
 
 #### API Customer
-- `customer_register(customer: CRMCustomer)`: Registrasi customer baru.
-- `customer_update(customer: CRMCustomer)`: Update data customer.
-- `customer_register_step(company_id, user_id, step)`: Update step registrasi.
-- `customer_pipeline(company_id, user_id, pipeline, update_milestone=True)`: Update pipeline customer.
-- `customer_acquisition(company_id, user_id, acquisition, extra)`: Update sumber akuisisi customer.
-- `customer_behavior(company_id, user_id, behavior)`: Update perilaku customer.
-- `customer_activity(company_id, user_id, activity)`: Update aktivitas customer.
-- `customer_milestone(company_id, user_id, milestone)`: Update milestone customer.
+
+```python
+# Registrasi customer baru.
+tenten_crm.customer_register(customer: CRMCustomer)
+
+# Update data customer.
+tenten_crm.customer_update(customer: CRMCustomer)
+
+# Update step registrasi.
+tenten_crm.customer_register_step(company_id, user_id, step)
+
+# Update pipeline customer.
+tenten_crm.customer_pipeline(company_id, user_id, pipeline, update_milestone=True)
+
+# Update sumber akuisisi customer.
+tenten_crm.customer_acquisition(company_id, user_id, acquisition, extra)
+
+# Update perilaku customer.
+tenten_crm.customer_behavior(company_id, user_id, behavior)
+
+# Update aktivitas customer.
+tenten_crm.customer_activity(company_id, user_id, activity)
+
+# Update milestone customer.
+tenten_crm.customer_milestone(company_id, user_id, milestone)
+```
 
 #### API Support Ticket
-- `support_ticket_new(ticket_data: CRMTicket)`: Membuat tiket support baru.
-- `support_ticket_update(ticket_id, ticket_data: CRMTicket)`: Update tiket support.
-- `support_ticket_get_paginated(...)`: Mendapatkan daftar tiket dengan pagination.
-- `support_ticket_get_by_id(ticket_id)`: Mendapatkan tiket berdasarkan ID.
-- `support_ticket_get_detail(ticket_id)`: Mendapatkan detail tiket.
-- `support_ticket_delete(ticket_id)`: Menghapus tiket.
-- `support_ticket_status(ticket_id, status)`: Update status tiket.
-- `support_ticket_priority(ticket_id, priority)`: Update prioritas tiket.
-- `support_ticket_attachment_upload(ticket_id, filepath)`: Upload lampiran ke tiket.
-- `support_ticket_attachment_delete(attachment_id)`: Hapus lampiran tiket.
+
+```python
+# Membuat tiket support baru.
+tenten_crm.support_ticket_new(ticket_data: CRMTicket)
+
+# Update tiket support.
+tenten_crm.support_ticket_update(ticket_id, ticket_data: CRMTicket)
+
+# Mendapatkan daftar tiket dengan pagination.
+tenten_crm.support_ticket_get_paginated(
+    search="",
+    status="", # open, on_progress, closed
+    priority="", # low, medium, high
+    category="",
+    sort="newest", # newest / oldest
+    page=1,
+    per_page=48,
+)
+
+# Mendapatkan tiket berdasarkan ID.
+tenten_crm.support_ticket_get_by_id(ticket_id)
+
+# Mendapatkan detail tiket.
+tenten_crm.support_ticket_get_detail(ticket_id)
+
+# Menghapus tiket.
+tenten_crm.support_ticket_delete(ticket_id)
+
+# Update status tiket.
+tenten_crm.support_ticket_status(ticket_id, status)
+
+# Update prioritas tiket.
+tenten_crm.support_ticket_priority(ticket_id, priority)
+
+# Upload lampiran ke tiket.
+tenten_crm.support_ticket_attachment_upload(ticket_id, filepath)
+
+# Hapus lampiran tiket.
+tenten_crm.support_ticket_attachment_delete(attachment_id)
+```
 
 ## Model Data
 
@@ -99,7 +147,7 @@ tenten_crm = TentenCRM(
 Model data untuk customer.
 
 ```python
-class : CRMCustomer:
+class CRMCustomer:
     company_id: str
     company_name: str
     company_city: str
@@ -127,27 +175,4 @@ class CRMTicket:
     agent_id: str
     agent_name: str
 
-```
-
----
-
-## Status
-
-Konstanta status pipeline, milestone, etc.
-
-```python
-from tentencrm import TentenCRM
-tenten_crm = TentenCRM(
-    base_url = "http://localhost:8081/api/v1/",
-    api_key = "your-api-key",
-    api_secret = "your-secret",
-    timeout = 10
-)
-
-tenten_crm.status.PIPELINE_NEW_LEAD
-tenten_crm.status.PIPELINE_ONBOARDING
-tenten_crm.status.PIPELINE_TRIAL_ACTIVE
-tenten_crm.status.PIPELINE_TRIAL_EXPIRED
-tenten_crm.status.PIPELINE_SUBS_ACTIVE
-#...
 ```
