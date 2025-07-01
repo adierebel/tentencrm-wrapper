@@ -96,6 +96,33 @@ tenten_crm.customer_activity(company_id, user_id, activity)
 
 # Update milestone customer.
 tenten_crm.customer_milestone(company_id, user_id, milestone)
+
+# All function return customer detail like this:
+"""
+{
+  "status_code": 200,
+  "payload": {
+    "id": "6863a11b6f8090b8dd62e51d",
+    "created": "2025-07-01T08:49:31",
+    "modified": "2025-07-01T08:49:45.705221",
+    "company_id": "6863a119ea5b393be44f1c4e",
+    "company_name": "PD Fujiati Iswahyudi (Persero) Tbk",
+    "company_city": "Banjarbaru",
+    "user_id": "6863a119ea5b393be44f1c4f",
+    "user_name": "Nadia Prasasta",
+    "user_email": "jabal58@example.net",
+    "user_contact": "+62 (18) 513 3838",
+    "join_date": "2024-01-10T21:00:49",
+    "pipeline": "onboarding",
+    "status_acquisition": "paid_ads",
+    "status_behavior": "quick_adopter",
+    "status_activity": "moderate",
+    "status_milestone": "registered",
+    "status_register": null,
+    "acquisition_extra": "google"
+  }
+}
+"""
 ```
 
 #### API Support Ticket
@@ -103,9 +130,15 @@ tenten_crm.customer_milestone(company_id, user_id, milestone)
 ```python
 # Membuat tiket support baru.
 tenten_crm.support_ticket_new(ticket_data: CRMTicket)
+"""
+Output ticket detail like `support_ticket_get_by_id`
+"""
 
 # Update tiket support.
 tenten_crm.support_ticket_update(ticket_id, ticket_data: CRMTicket)
+"""
+Output ticket detail like `support_ticket_get_by_id`
+"""
 
 # Mendapatkan daftar tiket dengan pagination.
 tenten_crm.support_ticket_get_paginated(
@@ -117,27 +150,176 @@ tenten_crm.support_ticket_get_paginated(
     page=1,
     per_page=48,
 )
+"""
+{
+  "status": 200,
+  "payload": {
+    "page": 1,
+    "per_page": 48,
+    "total": 5,
+    "items": [
+      {
+        "id": "6863a1346f8090b8dd62e525",
+        "created": "2025-07-01T08:49:56",
+        "modified": "2025-07-01T08:49:56",
+        "closed": null,
+        "code": "TK-250701-49785",
+        "status": "closed",
+        "priority": "low",
+        "category": "Application",
+        "subject": "Login failed",
+        "description": "Repellat quas laudantium dolor laboriosam eligendi cupiditate. Dolor eveniet dolorem officia. Quia consequatur tenetur ipsam nesciunt.",
+        "company_id": null,
+        "company_name": "CV Hidayanto",
+        "agent_id": null,
+        "agent_name": "Jaya Astuti"
+      },
+      ......
+    ]
+  }
+}
+"""
 
 # Mendapatkan tiket berdasarkan ID.
 tenten_crm.support_ticket_get_by_id(ticket_id)
+"""
+{
+  "status": 200,
+  "payload": {
+    "id": "6863a12b6f8090b8dd62e521",
+    "created": "2025-07-01T08:49:47",
+    "modified": "2025-07-01T08:50:00",
+    "closed": null,
+    "code": "TK-250701-89785",
+    "status": "on_progress",
+    "priority": "high",
+    "category": "Application",
+    "subject": "Data sync issue",
+    "description": "Aut eaque hic fuga. Nobis quaerat velit rerum quam iusto. Autem asperiores consequuntur consequuntur sunt magni vero.",
+    "company_id": null,
+    "company_name": "Perum Hastuti (Persero) Tbk",
+    "agent_id": null,
+    "agent_name": "Halim Prasetya"
+  }
+}
+"""
 
 # Mendapatkan detail tiket.
 tenten_crm.support_ticket_get_detail(ticket_id)
+"""
+{
+  "status": 200,
+  "payload": {
+    "ticket": {
+      "id": "6863a12b6f8090b8dd62e521",
+      "created": "2025-07-01T08:49:47",
+      "modified": "2025-07-01T08:50:00",
+      "closed": null,
+      "code": "TK-250701-89785",
+      "status": "on_progress",
+      "priority": "high",
+      "category": "Application",
+      "subject": "Data sync issue",
+      "description": "Aut eaque hic fuga. Nobis quaerat velit rerum quam iusto. Autem asperiores consequuntur consequuntur sunt magni vero.",
+      "company_id": null,
+      "company_name": "Perum Hastuti (Persero) Tbk",
+      "agent_id": null,
+      "agent_name": "Halim Prasetya"
+    },
+    "history": [
+      {
+        "id": "6863a1366f8090b8dd62e526",
+        "ticket_id": "6863a12b6f8090b8dd62e521",
+        "created": "2025-07-01T08:49:58",
+        "modified": "2025-07-01T08:49:58",
+        "update_type": "status",
+        "value_new": "on_progress",
+        "value_prev": "open",
+        "agent_id": null,
+        "agent_name": "API User"
+      },
+      ......
+    ],
+    "attachment": [
+      {
+        "id": "6863a13c6f8090b8dd62e529",
+        "ticket_id": "6863a12b6f8090b8dd62e521",
+        "created": "2025-07-01T08:50:04",
+        "modified": "2025-07-01T08:50:04",
+        "name": "screenshot.jpg",
+        "filename": "6863a12b6f8090b8dd62e521-523_screenshot.jpg",
+        "filetype": ".jpg",
+        "filesize": 57586,
+        "url": "http://localhost:8081/file/public/upload/6863a12b6f8090b8dd62e521-523_screenshot.jpg"
+      },
+      ......
+    ]
+  }
+}
+"""
 
 # Menghapus tiket.
 tenten_crm.support_ticket_delete(ticket_id)
+"""
+{
+  "status": 200,
+  "payload": {
+    "id": "6863a12b6f8090b8dd62e421"
+  }
+}
+"""
 
 # Update status tiket.
 tenten_crm.support_ticket_status(ticket_id, status)
+"""
+{
+  "status": 200,
+  "payload": {
+    "id": "6863a12b6f8090b8dd62e221"
+  }
+}
+"""
 
 # Update prioritas tiket.
 tenten_crm.support_ticket_priority(ticket_id, priority)
+"""
+{
+  "status": 200,
+  "payload": {
+    "id": "68623a12b6f8090b8dd62e544"
+  }
+}
+"""
 
 # Upload lampiran ke tiket.
 tenten_crm.support_ticket_attachment_upload(ticket_id, filepath)
+"""
+{
+  "status": 200,
+  "payload": {
+    "id": "6863a13e6f8090b8dd62e52a",
+    "ticket_id": "6863a12b6f8090b8dd62e521",
+    "created": "2025-07-01T08:50:06.456740",
+    "modified": "2025-07-01T08:50:06.456740",
+    "name": "error_logs.txt",
+    "filename": "6863a12b6f8090b8dd62e521-235_error_logs.txt",
+    "filetype": ".txt",
+    "filesize": 17,
+    "url": "http://localhost:8081/file/public/upload/6863a12b6f8090b8dd62e521-235_error_logs.txt"
+  }
+}
+"""
 
 # Hapus lampiran tiket.
 tenten_crm.support_ticket_attachment_delete(attachment_id)
+"""
+{
+  "status": 200,
+  "payload": {
+    "id": "6863a12b6f809238dd62e5212"
+  }
+}
+"""
 ```
 
 ## Model Data
