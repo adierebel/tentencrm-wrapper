@@ -19,5 +19,7 @@ class CRMTicket:
     category: str
     subject: str
     description: str
+    company_id: str
     company_name: str
+    agent_id: str
     agent_name: str

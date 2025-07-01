@@ -31,15 +31,17 @@ def generate_tickets(n=20):
     for _ in range(n):
         ticket = CRMTicket(
             code=f"TK-{datetime.now().strftime('%y%m%d')}-{randrange(1, 9)}{str(int(time()))[-4:]}",
-            status=rand_choices(['open', 'on_progress', 'closed']),
-            priority=rand_choices(['low', 'medium', 'high']),
-            category=rand_choices(['Billing', 'Account', 'Application']),
+            status=rand_choices(['open', 'on_progress', 'closed'])[0],
+            priority=rand_choices(['low', 'medium', 'high'])[0],
+            category=rand_choices(['Billing', 'Account', 'Application'])[0],
             subject=rand_choices([
                 "Login failed", "Email not received", "Payment declined", "Dashboard not loading",
                 "Data sync issue", "Unexpected error", "Feature request", "Slow performance"
-            ]),
+            ])[0],
             description=fake.paragraph(nb_sentences=3),
+            company_id=str(ObjectId()),
             company_name=fake.company(),
+            agent_id=str(ObjectId()),
             agent_name=fake.name(),
         )
         tickets.append(ticket)

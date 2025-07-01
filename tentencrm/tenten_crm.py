@@ -193,9 +193,9 @@ class TentenCRM:
     def support_ticket_get_paginated(
         self,
         search="",
-        status="all", # open, on_progress, closed
-        priority="all", # low, medium, high
-        category="all",
+        status="", # open, on_progress, closed
+        priority="", # low, medium, high
+        category="",
         sort="newest",
         page=1,
         per_page=48,
