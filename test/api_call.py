@@ -8,8 +8,8 @@ print(" * API Version:", __VERSION__)
 # Init
 tenten_crm = TentenCRM(
     base_url = "http://localhost:8081/api/v1/",
-    api_key = "68639be927f23395660152aa", # Dummy data, update this
-    api_secret = "f70dd9e0d59a18f035afc0623369fabf35d8802898b31789b9910e9cec725b4c246310b644efa6eba08c20d7cd8e75f772e45d2c6b7506568cfb5d56299d6065", # Dummy data, update this
+    api_key = "686aa8d0a8a0774615682465", # Dummy data, update this
+    api_secret = "a86f4661d14af1c96546a674a3c956e0fcd06a87e299ad41c4c3713f7941634449a5c93991da0abba07feefbfb75e0eee6734da9084124bf71268178431eed42", # Dummy data, update this
     timeout = 10
 )
 
@@ -32,7 +32,8 @@ def call_customer_api():
         )
     tenten_crm.customer_pipeline(
             company_id=customer.company_id,
-            pipeline=tenten_crm.status.PIPELINE_ONBOARDING
+            pipeline=tenten_crm.status.PIPELINE_ONBOARDING,
+            message_extra={"extra_1": "ini_pin_kamu"} # wa message placeholder
         )
     tenten_crm.customer_acquisition(
             company_id=customer.company_id,

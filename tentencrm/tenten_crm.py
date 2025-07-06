@@ -4,9 +4,10 @@ from time import time
 from hashlib import sha512
 from urllib.parse import urlencode
 from requests import get as http_get, post as http_post
+from json import dumps as json_dumps
 from os import path
+from sys import version_info
 import platform
-import sys
 
 __VERSION__ = "1.0"
 
@@ -37,7 +38,7 @@ class TentenCRM:
     def http_headers(self):
         return {
             'Authorization': f"Basic {self.http_req_signature()}",
-            'User-Agent': f"TentenCRM/{__VERSION__} ({platform.system()}; U; {platform.machine()}) Python/{sys.version_info.major}.{sys.version_info.minor}"
+            'User-Agent': f"TentenCRM/{__VERSION__} ({platform.system()}; U; {platform.machine()}) Python/{version_info.major}.{version_info.minor}"
         }
 
     def http_upload(self, endpoint, filepath, field_name="file"):
@@ -105,7 +106,7 @@ class TentenCRM:
             "step": step,
         })
 
-    def customer_pipeline(self, company_id=None, user_id=None, pipeline=None, update_milestone=True):
+    def customer_pipeline(self, company_id=None, user_id=None, pipeline=None, update_milestone=True, message_extra={}):
         # Check
         if not company_id and not user_id:
             raise ValueError("company_id or user_id cannot be empty.")
@@ -125,6 +126,7 @@ class TentenCRM:
             "company_id": company_id,
             "user_id": user_id,
             "pipeline": pipeline,
+            "extra": json_dumps(message_extra or {})
         })
 
     def customer_acquisition(self, company_id=None, user_id=None, acquisition=None, extra=None):
